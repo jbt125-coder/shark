@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shark Boy '72: Chrono-Link</title>
+    <style>
+        :root { --orange: #ff8c00; --neon-blue: #00f2ff; --pool-blue: #0077be; }
+        body { margin: 0; background: #000; color: white; font-family: 'Arial Black', sans-serif; overflow: hidden; touch-action: none; }
+        
+        .screen { width: 100vw; height: 100vh; display: none; position: absolute; top: 0; left: 0; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
+        
+        /* 1. Sci-Fi Intro */
+        #story-screen { background: radial-gradient(circle, #001a33 0%, #000 100%); font-family: monospace; color: var(--neon-blue); }
+        .dna-box { border: 1px solid var(--neon-blue); padding: 20px; text-align: left; background: rgba(0,0,0,0.5); }
+
+        /* 2. Orange Menu */
+        #menu { background: var(--orange); }
+        .btn { padding: 10px; margin: 4px; border: none; border-radius: 8px; background: white; color: var(--orange); font-size: 0.9rem; font-weight: bold; width: 90%; box-shadow: 0 4px #cc7000; }
+        
+        /* 3. Pool & HUD */
+        #hud { position: absolute; top: 10px; width: 100%; z-index: 10; pointer-events: none; }
+        #stopwatch { background: #111; border: 3px solid #444; border-radius: 8px; padding: 8px; color: #f00; font-size: 2.2rem; font-family: monospace; }
+        #legend-name { background: rgba(0,0,0,0.7); font-size: 0.9rem; padding: 3px 10px; border-radius: 10px; margin-top: 5px; display: inline-block; }
+        
+        #controls { position: absolute; bottom: 0; width: 100%; height: 35%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; box-sizing: border-box; background: rgba(0,0,0,0.8); }
+        .swim-btn { background: rgba(255,255,255,0.1); border: 2px solid white; border-radius: 12px; color: white; transition: 0.1s; position: relative; }
+        .active-btn { background: var(--neon-blue) !important; color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+        
+        #cramp-msg { position: absolute; top: 45%; width: 100%; color: red; font-size: 3.5rem; display: none; z-index: 100; text-shadow: 2px 2px #000; }
+        #loss-img { width: 260px; border: 5px solid var(--orange); margin-top: 20px; }
+        #win-lab { display: none; width: 100%; height: 100%; background: #001a33; border: 2px solid var(--neon-blue); align-items: center; justify-content: center; flex-direction: column; }
+    </style>
+</head>
+<body onload="document.getElementById('story-screen').style.display='flex'">
+
+    <div id="story-screen" class="screen">
+        <div class="dna-box">
+            <h2 style="margin:0;">MISSION: CHRONO-72</h2>
+            <p>> YEAR: 2172</p>
+            <p>> DNA: Shark-Human Hybrid #007</p>
+            <p>> OBJECTIVE: Prove genetic evolution by defeating the natural legends of 1972.</p>
+            <p>> CONTROLS: Alternate arms. Flip phone 360° to turn. Breathe or face muscle fatigue.</p>
+        </div>
+        <button class="btn" style="background:var(--neon-blue); color:#000; margin-top:20px;" onclick="showMenu()">[ ENGAGE TIME-STREAM ]</button>
+    </div>
+
+    <div id="menu" class="screen">
+        <h1 style="margin:0;">SHARK BOY '72</h1>
+        <p style="margin-top:0; font-size:0.8rem;">SELECT OLYMPIC EVENT</p>
+        <button class="btn" onclick="startRace('fly100')">100m Butterfly (Spitz 🇺🇸)</button>
+        <button class="btn" onclick="startRace('fly200')">200m Butterfly (Spitz 🇺🇸)</button>
+        <button class="btn" onclick="startRace('free100')">100m Freestyle (Spitz 🇺🇸)</button>
+        <button class="btn" onclick="startRace('free200')">200m Freestyle (Spitz 🇺🇸)</button>
+        <button class="btn" onclick="startRace('back100')">100m Backstroke (Matthes 🇩🇪)</button>
+        <button class="btn" onclick="startRace('breast100')">100m Breast (Taguchi 🇯🇵)</button>
+        <button class="btn" onclick="startRace('im400')">400m IM (Larsson 🇸🇪)</button>
+    </div>
+
+    <div id="game-container" class="screen" style="padding:0;">
+        <div id="hud">
+            <div id="stopwatch">00:00.00</div><br>
+            <div id="legend-name">VS --</div>
+            <div id="signal" style="font-size: 3rem; color: yellow; margin-top:10px;"></div>
+        </div>
+        <div id="cramp-msg">CRAMP!</div>
+        <canvas id="poolCanvas"></canvas>
+        <div id="controls">
+            <button class="swim-btn" id="l-btn">LEFT</button>
+            <button class="swim-btn" id="r-btn">RIGHT</button>
+            <button class="swim-btn" id="b-btn" style="grid-column: span 2;">BREATHE (O2: <span id="oxy">100</span>%)</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <div id="win-lab">
+            <h1 style="color:var(--neon-blue);">GENETIC SUPERIORITY</h1>
+            <div style="font-family:monospace;">FUTURE DNA VERIFIED: 100%</div>
+        </div>
+        <div id="loss-area">
+            <h1 id="res-title">MARK REMAINS CHAMP</h1>
+            <img id="loss-img" src="image.png" alt="Legend Box">
+        </div>
+        <button class="btn" style="margin-top:20px;" onclick="location.reload()">RE-SYNC DNA</button>
+    </div>
+
+<script>
+    const events = {
+        fly100: { t: 54.27, l: 2, n: "Spitz 🇺🇸" },
+        fly200: { t: 120.70, l: 4, n: "Spitz 🇺🇸" },
+        free100: { t: 51.22, l: 2, n: "Spitz 🇺🇸" },
+        free200: { t: 112.78, l: 4, n: "Spitz 🇺🇸" },
+        back100: { t: 56.58, l: 2, n: "Matthes 🇩🇪" },
+        breast100: { t: 64.94, l: 2, n: "Taguchi 🇯🇵" },
+        im400: { t: 271.98, l: 8, n: "Larsson 🇸🇪" }
+    };
+
+    let pDist = 0, bDist = 0, isRacing = false, startTime = 0;
+    let oxy = 100, isCramped = false, lastArm = null, sameCount = 0, currentEvent;
+
+    function showMenu() { 
+        document.getElementById('story-screen').style.display = 'none'; 
+        document.getElementById('menu').style.display = 'flex'; 
+        if(typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission();
+    }
+
+    function startRace(k) {
+        currentEvent = events[k];
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('game-container').style.display = 'block';
+        document.getElementById('legend-name').innerText = `VS ${currentEvent.n} (RECORD: ${currentEvent.t}s)`;
+        runSequence();
+    }
+
+    function runSequence() {
+        const sig = document.getElementById('signal');
+        sig.innerText = "READY...";
+        setTimeout(() => {
+            sig.innerText = "SET...";
+            window.addEventListener('devicemotion', handleFalseStart);
+            setTimeout(() => {
+                const beep = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = beep.createOscillator();
+                osc.connect(beep.destination);
+                sig.innerText = "GO!";
+                osc.start(); osc.stop(beep.currentTime + 0.15);
+                isRacing = true; startTime = performance.now();
+                window.removeEventListener('devicemotion', handleFalseStart);
+                window.addEventListener('devicemotion', handleFlip);
+                requestAnimationFrame(gameLoop);
+            }, Math.random() * 3000 + 1500);
+        }, 1500);
+    }
+
+    function handleFalseStart(e) {
+        if (Math.abs(e.accelerationIncludingGravity.z) > 35) {
+            alert("FALSE START! DQ!"); location.reload();
+        }
+    }
+
+    function handleFlip(e) {
+        if (!isRacing) return;
+        // 360 Pitch Flip detection
+        if (Math.abs(e.rotationRate.alpha) > 350 && pDist % 100 > 88) {
+            pDist += 5; // Wall push boost
+        }
+    }
+
+    document.getElementById('l-btn').onclick = () => swim('L', 'l-btn', 'r-btn');
+    document.getElementById('r-btn').onclick = () => swim('R', 'r-btn', 'l-btn');
+    document.getElementById('b-btn').onclick = () => { oxy = 100; };
+
+    function swim(arm, id, other) {
+        if (!isRacing || isCramped) return;
+        
+        // Fatigue Logic: Buttons move and shrink
+        const btn = document.getElementById(id);
+        if (oxy < 60) {
+            btn.style.transform = `scale(${oxy/100 + 0.5}) translate(${Math.random()*15}px, ${Math.random()*10}px)`;
+        } else {
+            btn.style.transform = `scale(1) translate(0,0)`;
+        }
+
+        document.getElementById(id).classList.add('active-btn');
+        document.getElementById(other).classList.remove('active-btn');
+
+        if (arm === lastArm) {
+            sameCount++;
+            if (sameCount >= 2) triggerCramp();
+        } else { sameCount = 0; }
+        
+        lastArm = arm;
+        pDist += (oxy > 0 ? 0.72 : 0.1);
+        oxy -= 3.5;
+        document.getElementById('oxy').innerText = Math.max(0, oxy.toFixed(0));
+        if (pDist >= currentEvent.l * 100) endRace(true);
+    }
+
+    function triggerCramp() {
+        isCramped = true; sameCount = 0;
+        document.getElementById('cramp-msg').style.display = 'block';
+        setTimeout(() => { isCramped = false; document.getElementById('cramp-msg').style.display = 'none'; }, 2500);
+    }
+
+    function gameLoop(t) {
+        if (!isRacing) return;
+        let elapsed = (t - startTime) / 1000;
+        let m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        let s = (elapsed % 60).toFixed(2).padStart(5, '0');
+        document.getElementById('stopwatch').innerText = `${m}:${s}`;
+
+        // LEGEND BOT: High difficulty, rubber-bands to the player
+        let botBase = (100 * currentEvent.l) / currentEvent.t;
+        let speedMult = (pDist > bDist + 4) ? 1.14 : 1.0; 
+        bDist += (botBase / 60) * speedMult;
+
+        if (bDist >= currentEvent.l * 100) endRace(false);
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function draw() {
+        const c = document.getElementById('poolCanvas'); const ctx = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight * 0.65;
+        ctx.fillStyle = "#0055aa"; ctx.fillRect(0,0,c.width,c.height);
+        
+        ctx.strokeStyle = "white"; ctx.setLineDash([10, 20]);
+        ctx.beginPath(); ctx.moveTo(c.width/2, 0); ctx.lineTo(c.width/2, c.height); ctx.stroke();
+
+        const getY = (d) => {
+            let p = d % 100; let l = Math.floor(d / 100);
+            let y = (p / 100) * (c.height - 100) + 50;
+            return (l % 2 === 0) ? y : c.height - y;
+        };
+
+        // Opponent
+        ctx.save(); ctx.translate(c.width * 0.25, getY(bDist));
+        if (Math.floor(bDist/100) % 2 !== 0) ctx.rotate(Math.PI);
+        ctx.font = "40px Arial"; ctx.fillText("🏊", -20, 20); ctx.restore();
+
+        // Player
+        ctx.save(); ctx.translate(c.width * 0.75, getY(pDist));
+        if (Math.floor(pDist/100) % 2 !== 0) ctx.rotate(Math.PI);
+        ctx.font = "50px Arial"; ctx.fillText("🦈", -25, 25); ctx.restore();
+    }
+
+    function endRace(win) {
+        isRacing = false;
+        document.getElementById('game-container').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'flex';
+        if (win) {
+            document.getElementById('win-lab').style.display = 'flex';
+            document.getElementById('loss-area').style.display = 'none';
+        } else {
+            document.getElementById('win-lab').style.display = 'none';
+            document.getElementById('loss-area').style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>
