@@ -52,11 +52,8 @@
         .legend-portrait { width: 200px; height: 200px; border-radius: 10px; border: 3px solid var(--orange); background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%); display: flex; align-items: center; justify-content: center; font-size: 80px; margin: 20px auto; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
         
         #photo-screen { background: var(--orange); }
-        .video-container { position: relative; display: inline-block; }
         #camera-video { max-width: 90%; max-height: 50vh; border: 3px solid var(--neon-blue); border-radius: 10px; }
-        .mustache-overlay { position: absolute; bottom: 35%; left: 50%; transform: translateX(-50%); font-size: 80px; pointer-events: none; }
-        .medals-overlay { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 60px; pointer-events: none; }
-        #photo-canvas { max-width: 90%; border: 3px solid #000; margin: 10px 0; }
+        #photo-canvas { max-width: 90%; max-height: 70vh; border: 3px solid #000; margin: 10px 0; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -140,15 +137,21 @@
     </div>
 
     <div id="photo-screen" class="screen">
-        <h2 style="margin: 10px 0;">VICTORY DOCUMENTATION</h2>
-        <p id="photo-event-name" style="font-size: 1.1rem; margin: 5px 0;">--</p>
+        <h2 style="margin: 10px 0; color: #000;">VICTORY PHOTO</h2>
+        <p style="font-size: 0.9rem; margin: 5px 0; color: #000;">Position your mouth in the box</p>
         <div id="camera-container">
-            <div class="video-container">
-                <video id="camera-video" autoplay playsinline></video>
-                <div class="mustache-overlay">👨</div>
-                <div class="medals-overlay">🥇🥇🥇</div>
+            <div class="video-container" style="position: relative; display: inline-block;">
+                <video id="camera-video" autoplay playsinline style="max-width: 90vw; max-height: 60vh; border: 3px solid var(--neon-blue); border-radius: 10px;"></video>
+                <!-- Face circle guide -->
+                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <circle cx="50%" cy="40%" r="25%" fill="none" stroke="lime" stroke-width="3" stroke-dasharray="10,5"/>
+                    <text x="50%" y="20%" text-anchor="middle" fill="lime" font-size="16" font-family="Arial">Position face here</text>
+                </svg>
+                <!-- Mouth placeholder box -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 15%; height: 8%; border: 3px solid red; background: rgba(255,0,0,0.2); border-radius: 10px;"></div>
+                <div style="position: absolute; top: 59%; left: 50%; transform: translateX(-50%); color: red; font-size: 14px; font-weight: bold; text-shadow: 0 0 3px black;">MOUTH HERE</div>
             </div>
-            <button class="btn" style="margin-top:15px; background: lime; color: #000; font-size: 1.1rem;" onclick="capturePhoto()">📸 TAKE PHOTO</button>
+            <button class="btn" style="margin-top:15px; background: lime; color: #000; font-size: 1.2rem;" onclick="capturePhoto()">📸 TAKE PHOTO</button>
             <button class="btn" onclick="cancelPhoto()">CANCEL</button>
         </div>
         <div id="preview-container" class="hidden">
@@ -742,7 +745,6 @@
     async function startPhoto() {
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('photo-screen').style.display = 'flex';
-        document.getElementById('photo-event-name').innerText = `${currentEvent.eventName} - ${finalTime}`;
         
         try {
             cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -758,21 +760,151 @@
         const canvas = document.getElementById('photo-canvas');
         const ctx = canvas.getContext('2d');
         
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        // Flash effect
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed';
+        flash.style.top = '0';
+        flash.style.left = '0';
+        flash.style.width = '100vw';
+        flash.style.height = '100vh';
+        flash.style.background = 'white';
+        flash.style.zIndex = '9999';
+        flash.style.opacity = '1';
+        flash.style.transition = 'opacity 0.3s';
+        document.body.appendChild(flash);
         
-        // Draw video frame
-        ctx.drawImage(video, 0, 0);
+        // Camera shutter sound
+        if (audioContext) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.1);
+        }
         
-        // Add mustache
-        const mustacheSize = canvas.width * 0.2;
-        ctx.font = `${mustacheSize}px Arial`;
-        ctx.fillText('👨', canvas.width/2 - mustacheSize/2, canvas.height * 0.65);
+        setTimeout(() => {
+            flash.style.opacity = '0';
+            setTimeout(() => document.body.removeChild(flash), 300);
+        }, 100);
         
-        // Add medals
-        const medalSize = canvas.width * 0.15;
-        ctx.font = `${medalSize}px Arial`;
-        ctx.fillText('🥇🥇🥇', canvas.width/2 - medalSize*1.5, canvas.height * 0.85);
+        // Create Wheaties box (portrait orientation)
+        canvas.width = 600;
+        canvas.height = 900;
+        
+        // Orange background
+        ctx.fillStyle = '#ff8c00';
+        ctx.fillRect(0, 0, 600, 900);
+        
+        // Wheaties logo at top
+        ctx.fillStyle = '#ff6347';
+        ctx.strokeStyle = '#8B0000';
+        ctx.lineWidth = 4;
+        ctx.font = 'bold 90px Arial';
+        ctx.strokeText('Wheaties', 80, 100);
+        ctx.fillText('Wheaties', 80, 100);
+        
+        // Registered trademark
+        ctx.font = '20px Arial';
+        ctx.fillStyle = '#000';
+        ctx.fillText('®', 520, 70);
+        
+        // Event name
+        ctx.fillStyle = '#00f2ff';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.font = 'bold 32px Arial';
+        const eventText = currentEvent.eventName.toUpperCase();
+        ctx.strokeText(eventText, 300 - ctx.measureText(eventText).width/2, 160);
+        ctx.fillText(eventText, 300 - ctx.measureText(eventText).width/2, 160);
+        
+        // Time
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 28px Arial';
+        const timeText = `TIME: ${finalTime}`;
+        ctx.fillText(timeText, 300 - ctx.measureText(timeText).width/2, 200);
+        
+        // Photo area with border
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(50, 230, 500, 500);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 5;
+        ctx.strokeRect(50, 230, 500, 500);
+        
+        // Draw captured photo
+        const aspectRatio = video.videoWidth / video.videoHeight;
+        let drawWidth = 500;
+        let drawHeight = 500;
+        
+        if (aspectRatio > 1) {
+            drawHeight = drawWidth / aspectRatio;
+        } else {
+            drawWidth = drawHeight * aspectRatio;
+        }
+        
+        const offsetX = 50 + (500 - drawWidth) / 2;
+        const offsetY = 230 + (500 - drawHeight) / 2;
+        
+        ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+        
+        // Draw scribbled mustache (above mouth position which is at 50% of photo)
+        const mustacheY = offsetY + drawHeight * 0.45; // 45% down (above the mouth at 50%)
+        const mustacheX = offsetX + drawWidth * 0.5;
+        const mustacheWidth = drawWidth * 0.25;
+        
+        ctx.strokeStyle = '#3d2817'; // Dark brown
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Draw multiple scribbled strokes for natural look
+        for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            // Left side of mustache
+            ctx.moveTo(mustacheX - mustacheWidth/2, mustacheY + Math.random() * 3);
+            ctx.quadraticCurveTo(
+                mustacheX - mustacheWidth/4, mustacheY - 8 + Math.random() * 4,
+                mustacheX - 5, mustacheY - 5 + Math.random() * 3
+            );
+            // Right side of mustache
+            ctx.moveTo(mustacheX + 5, mustacheY - 5 + Math.random() * 3);
+            ctx.quadraticCurveTo(
+                mustacheX + mustacheWidth/4, mustacheY - 8 + Math.random() * 4,
+                mustacheX + mustacheWidth/2, mustacheY + Math.random() * 3
+            );
+            ctx.stroke();
+        }
+        
+        // Thicker center strokes
+        ctx.lineWidth = 8;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(mustacheX - mustacheWidth/3, mustacheY + Math.random() * 2);
+            ctx.lineTo(mustacheX + mustacheWidth/3, mustacheY + Math.random() * 2);
+            ctx.stroke();
+        }
+        
+        // Draw gold medal on chest (70% down photo)
+        const medalY = offsetY + drawHeight * 0.7;
+        const medalX = mustacheX;
+        ctx.font = '80px Arial';
+        ctx.fillText('🥇', medalX - 40, medalY);
+        
+        // Bottom text
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 24px Arial';
+        ctx.fillText('1972 OLYMPICS CHAMPION', 300 - ctx.measureText('1972 OLYMPICS CHAMPION').width/2, 780);
+        
+        ctx.font = '20px Arial';
+        ctx.fillText('Breakfast of Champions', 300 - ctx.measureText('Breakfast of Champions').width/2, 820);
+        
+        // Small cereal box tagline
+        ctx.font = 'italic 16px Arial';
+        ctx.fillStyle = '#666';
+        ctx.fillText('The Breakfast of Champions since 1924', 300 - ctx.measureText('The Breakfast of Champions since 1924').width/2, 860);
         
         // Stop camera
         if (cameraStream) {
@@ -789,10 +921,10 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `victory-${currentEvent.eventName}-${finalTime}.png`;
+            a.download = `wheaties-${currentEvent.eventName.replace(/\s/g, '-')}-${finalTime.replace(/:/g, '-')}.png`;
             a.click();
             URL.revokeObjectURL(url);
-            alert('Photo saved to downloads!');
+            alert('Wheaties box saved to downloads!');
             location.reload();
         });
     }
