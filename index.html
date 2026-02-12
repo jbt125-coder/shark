@@ -14,25 +14,53 @@
         #story-screen { background: radial-gradient(circle, #001a33 0%, #000 100%); font-family: monospace; color: var(--neon-blue); }
         .dna-box { border: 1px solid var(--neon-blue); padding: 20px; text-align: left; background: rgba(0,0,0,0.5); }
 
-        /* 2. Orange Menu */
+        /* 2. Calibration */
+        #calibration-screen { background: radial-gradient(circle, #1a0033 0%, #000 100%); font-family: monospace; color: var(--neon-blue); }
+        .cal-status { font-size: 1.5rem; margin: 20px 0; color: yellow; }
+        .cal-complete { color: lime !important; }
+
+        /* 3. Orange Menu */
         #menu { background: var(--orange); }
-        .btn { padding: 10px; margin: 4px; border: none; border-radius: 8px; background: white; color: var(--orange); font-size: 0.9rem; font-weight: bold; width: 90%; box-shadow: 0 4px #cc7000; }
+        .btn { padding: 10px; margin: 4px; border: none; border-radius: 8px; background: white; color: var(--orange); font-size: 0.9rem; font-weight: bold; width: 90%; max-width: 400px; box-shadow: 0 4px #cc7000; cursor: pointer; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px #cc7000; }
         
-        /* 3. Pool & HUD */
+        /* 4. Pool & HUD */
         #hud { position: absolute; top: 10px; width: 100%; z-index: 10; pointer-events: none; }
         #stopwatch { background: #111; border: 3px solid #444; border-radius: 8px; padding: 8px; color: #f00; font-size: 2.2rem; font-family: monospace; }
         #legend-name { background: rgba(0,0,0,0.7); font-size: 0.9rem; padding: 3px 10px; border-radius: 10px; margin-top: 5px; display: inline-block; }
         
-        #controls { position: absolute; bottom: 0; width: 100%; height: 35%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; box-sizing: border-box; background: rgba(0,0,0,0.8); }
-        .swim-btn { background: rgba(255,255,255,0.1); border: 2px solid white; border-radius: 12px; color: white; transition: 0.1s; position: relative; }
+        #controls { position: absolute; bottom: 0; width: 100%; height: 35%; display: grid; gap: 10px; padding: 15px; box-sizing: border-box; background: rgba(0,0,0,0.8); }
+        
+        /* Freestyle controls */
+        .controls-freestyle { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .swim-btn { background: rgba(255,255,255,0.1); border: 2px solid white; border-radius: 12px; color: white; transition: background 0.1s, box-shadow 0.1s; position: relative; cursor: pointer; font-size: 1rem; font-weight: bold; }
         .active-btn { background: var(--neon-blue) !important; color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+        .breathe-btn { grid-column: span 2; }
+        
+        /* Butterfly controls */
+        .controls-butterfly { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .butterfly-arm { font-size: 0.8rem; }
+        .butterfly-kick { font-size: 0.8rem; }
+        
+        /* Backstroke controls */
+        .controls-backstroke { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+        .rock-zone { grid-column: span 2; background: rgba(100,100,255,0.2); border: 3px dashed white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        
+        /* Breaststroke controls */
+        .controls-breaststroke { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+        .slider-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .arm-slider { -webkit-appearance: none; width: 80%; height: 200px; background: rgba(255,255,255,0.1); writing-mode: bt-lr; -webkit-writing-mode: bt-lr; transform: rotate(270deg); cursor: pointer; }
+        .arm-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 40px; height: 40px; background: white; border-radius: 50%; cursor: pointer; }
+        .arm-slider::-moz-range-thumb { width: 40px; height: 40px; background: white; border-radius: 50%; cursor: pointer; }
+        .slider-label { font-size: 0.7rem; margin-top: 10px; }
         
         #cramp-msg { position: absolute; top: 45%; width: 100%; color: red; font-size: 3.5rem; display: none; z-index: 100; text-shadow: 2px 2px #000; }
-        #loss-img { width: 260px; border: 5px solid var(--orange); margin-top: 20px; }
         #win-lab { display: none; width: 100%; height: 100%; background: #001a33; border: 2px solid var(--neon-blue); align-items: center; justify-content: center; flex-direction: column; }
+        
+        .legend-portrait { width: 200px; height: 200px; border-radius: 10px; border: 3px solid var(--orange); background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%); display: flex; align-items: center; justify-content: center; font-size: 80px; margin: 20px auto; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
     </style>
 </head>
-<body onload="document.getElementById('story-screen').style.display='flex'">
+<body onload="init()">
 
     <div id="story-screen" class="screen">
         <div class="dna-box">
@@ -40,9 +68,32 @@
             <p>> YEAR: 2172</p>
             <p>> DNA: Shark-Human Hybrid #007</p>
             <p>> OBJECTIVE: Prove genetic evolution by defeating the natural legends of 1972.</p>
-            <p>> CONTROLS: Alternate arms. Flip phone 360° to turn. Breathe or face muscle fatigue.</p>
+            <p>> MISSION: Complete calibration to unlock time-stream.</p>
         </div>
-        <button class="btn" style="background:var(--neon-blue); color:#000; margin-top:20px;" onclick="showMenu()">[ ENGAGE TIME-STREAM ]</button>
+        <button class="btn" style="background:var(--neon-blue); color:#000; margin-top:20px;" onclick="showCalibration()">[ BEGIN CALIBRATION ]</button>
+    </div>
+
+    <div id="calibration-screen" class="screen">
+        <h2 style="color:var(--neon-blue);">CALIBRATION PROTOCOL</h2>
+        <div class="cal-status" id="cal-status">TESTING DIVE MECHANISM...</div>
+        <div style="border: 2px solid var(--neon-blue); padding: 20px; margin: 20px; background: rgba(0,0,0,0.5); font-family: monospace;">
+            <div id="dive-test" style="display:none;">
+                <p>TEST 1: DIVE ENTRY</p>
+                <p style="font-size: 0.9rem;">When you see "GO!", tilt phone forward to dive.</p>
+                <div id="dive-signal" style="font-size: 2rem; color: yellow; margin: 20px 0;"></div>
+            </div>
+            <div id="flip-test" style="display:none;">
+                <p>TEST 2: WALL TURN</p>
+                <p style="font-size: 0.9rem;">Rotate phone 360° in any direction.</p>
+                <div id="flip-signal" style="font-size: 2rem; color: yellow; margin: 20px 0;">Rotate phone now!</div>
+            </div>
+            <div id="cal-complete" style="display:none;">
+                <p style="color: lime; font-size: 1.5rem;">✓ CALIBRATION COMPLETE</p>
+                <p style="font-size: 0.9rem;">All systems operational.</p>
+            </div>
+        </div>
+        <button class="btn" id="skip-cal-btn" onclick="skipCalibration()">SKIP CALIBRATION</button>
+        <button class="btn" id="continue-btn" style="background:lime; color:#000; display:none;" onclick="showMenu()">[ INITIATE FINAL TIME TRAVEL ]</button>
     </div>
 
     <div id="menu" class="screen">
@@ -53,7 +104,7 @@
         <button class="btn" onclick="startRace('free100')">100m Freestyle (Spitz 🇺🇸)</button>
         <button class="btn" onclick="startRace('free200')">200m Freestyle (Spitz 🇺🇸)</button>
         <button class="btn" onclick="startRace('back100')">100m Backstroke (Matthes 🇩🇪)</button>
-        <button class="btn" onclick="startRace('breast100')">100m Breast (Taguchi 🇯🇵)</button>
+        <button class="btn" onclick="startRace('breast100')">100m Breaststroke (Taguchi 🇯🇵)</button>
         <button class="btn" onclick="startRace('im400')">400m IM (Larsson 🇸🇪)</button>
     </div>
 
@@ -66,9 +117,7 @@
         <div id="cramp-msg">CRAMP!</div>
         <canvas id="poolCanvas"></canvas>
         <div id="controls">
-            <button class="swim-btn" id="l-btn">LEFT</button>
-            <button class="swim-btn" id="r-btn">RIGHT</button>
-            <button class="swim-btn" id="b-btn" style="grid-column: span 2;">BREATHE (O2: <span id="oxy">100</span>%)</button>
+            <!-- Dynamic controls injected here -->
         </div>
     </div>
 
@@ -76,93 +125,284 @@
         <div id="win-lab">
             <h1 style="color:var(--neon-blue);">GENETIC SUPERIORITY</h1>
             <div style="font-family:monospace;">FUTURE DNA VERIFIED: 100%</div>
+            <div class="legend-portrait">🥈</div>
         </div>
         <div id="loss-area">
-            <h1 id="res-title">MARK REMAINS CHAMP</h1>
-            <img id="loss-img" src="image.png" alt="Legend Box">
+            <h1 id="res-title">LEGEND REMAINS CHAMPION</h1>
+            <div class="legend-portrait">🏆</div>
+            <p id="legend-final-name" style="font-size: 1.2rem;">--</p>
         </div>
         <button class="btn" style="margin-top:20px;" onclick="location.reload()">RE-SYNC DNA</button>
     </div>
 
 <script>
+    // ===== PART 1: GAME DATA & INITIALIZATION =====
+    
     const events = {
-        fly100: { t: 54.27, l: 2, n: "Spitz 🇺🇸" },
-        fly200: { t: 120.70, l: 4, n: "Spitz 🇺🇸" },
-        free100: { t: 51.22, l: 2, n: "Spitz 🇺🇸" },
-        free200: { t: 112.78, l: 4, n: "Spitz 🇺🇸" },
-        back100: { t: 56.58, l: 2, n: "Matthes 🇩🇪" },
-        breast100: { t: 64.94, l: 2, n: "Taguchi 🇯🇵" },
-        im400: { t: 271.98, l: 8, n: "Larsson 🇸🇪" }
+        fly100: { t: 54.27, l: 2, n: "Mark Spitz", flag: "🇺🇸", stroke: "butterfly" },
+        fly200: { t: 120.70, l: 4, n: "Mark Spitz", flag: "🇺🇸", stroke: "butterfly" },
+        free100: { t: 51.22, l: 2, n: "Mark Spitz", flag: "🇺🇸", stroke: "freestyle" },
+        free200: { t: 112.78, l: 4, n: "Mark Spitz", flag: "🇺🇸", stroke: "freestyle" },
+        back100: { t: 56.58, l: 2, n: "Roland Matthes", flag: "🇩🇪", stroke: "backstroke" },
+        breast100: { t: 64.94, l: 2, n: "Nobutaka Taguchi", flag: "🇯🇵", stroke: "breaststroke" },
+        im400: { t: 271.98, l: 8, n: "Gunnar Larsson", flag: "🇸🇪", stroke: "im" }
     };
 
+    // Game state
     let pDist = 0, bDist = 0, isRacing = false, startTime = 0;
     let oxy = 100, isCramped = false, lastArm = null, sameCount = 0, currentEvent;
+    let audioContext = null;
+    let permissionsGranted = false;
+    let hasDived = false;
+    let lastFlipTime = 0;
+    
+    // Calibration state
+    let calDiveComplete = false;
+    let calFlipComplete = false;
+    let calDiveStartTime = 0;
+    
+    // Butterfly state
+    let flyLeftArm = false, flyRightArm = false, flyLeftKick = false, flyRightKick = false;
+    
+    // Backstroke state
+    let lastTilt = 0;
+    let backstrokeSpeed = 0;
+    let kicksAfterTurn = 0;
+    let justTurned = false;
+    
+    // Breaststroke state
+    let sliderPosition = 0;
+    let sliderAtTop = false;
+    let sliderCycleComplete = false;
+    
+    // IM state
+    let currentStroke = "butterfly"; // for IM races
+    let imSegment = 0; // 0=fly, 1=back, 2=breast, 3=free
 
-    function showMenu() { 
-        document.getElementById('story-screen').style.display = 'none'; 
-        document.getElementById('menu').style.display = 'flex'; 
-        if(typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission();
+    async function init() {
+        document.getElementById('story-screen').style.display = 'flex';
+        
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceMotionEvent.requestPermission();
+                permissionsGranted = (permission === 'granted');
+            } catch (error) {
+                console.log('Permission request failed:', error);
+                permissionsGranted = false;
+            }
+        } else {
+            permissionsGranted = true;
+        }
     }
+
+    function showCalibration() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        document.getElementById('story-screen').style.display = 'none';
+        document.getElementById('calibration-screen').style.display = 'flex';
+        
+        // Start dive test
+        setTimeout(() => {
+            document.getElementById('dive-test').style.display = 'block';
+            startDiveTest();
+        }, 1000);
+    }
+
+    function startDiveTest() {
+        const sig = document.getElementById('dive-signal');
+        sig.innerText = "READY...";
+        setTimeout(() => {
+            sig.innerText = "GO!";
+            sig.style.color = "lime";
+            calDiveStartTime = Date.now();
+            window.addEventListener('devicemotion', checkDiveCalibration);
+        }, 1500);
+    }
+
+    function checkDiveCalibration(e) {
+        if (calDiveComplete || !e.accelerationIncludingGravity) return;
+        
+        const y = e.accelerationIncludingGravity.y || 0;
+        const z = e.accelerationIncludingGravity.z || 0;
+        const x = e.accelerationIncludingGravity.x || 0;
+        
+        if (Math.abs(y) > 3 || Math.abs(z - 9.8) > 4 || Math.abs(x) > 3) {
+            calDiveComplete = true;
+            window.removeEventListener('devicemotion', checkDiveCalibration);
+            
+            document.getElementById('dive-signal').innerText = "✓ DIVE DETECTED";
+            document.getElementById('dive-signal').style.color = "lime";
+            
+            if (audioContext) {
+                const osc = audioContext.createOscillator();
+                osc.connect(audioContext.destination);
+                osc.frequency.value = 800;
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.1);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('dive-test').style.display = 'none';
+                document.getElementById('flip-test').style.display = 'block';
+                window.addEventListener('devicemotion', checkFlipCalibration);
+            }, 1500);
+        }
+    }
+
+    function checkFlipCalibration(e) {
+        if (calFlipComplete || !e.rotationRate) return;
+        
+        const pitchSpeed = Math.abs(e.rotationRate.beta || 0);
+        const rollSpeed = Math.abs(e.rotationRate.gamma || 0);
+        const yawSpeed = Math.abs(e.rotationRate.alpha || 0);
+        const totalRotation = pitchSpeed + rollSpeed + yawSpeed;
+        
+        if (totalRotation > 200) {
+            calFlipComplete = true;
+            window.removeEventListener('devicemotion', checkFlipCalibration);
+            
+            document.getElementById('flip-signal').innerText = "✓ FLIP DETECTED";
+            document.getElementById('flip-signal').style.color = "lime";
+            
+            if (audioContext) {
+                const osc = audioContext.createOscillator();
+                osc.connect(audioContext.destination);
+                osc.frequency.value = 1000;
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.1);
+            }
+            
+            setTimeout(() => {
+                completeCalibration();
+            }, 1500);
+        }
+    }
+
+    function completeCalibration() {
+        document.getElementById('flip-test').style.display = 'none';
+        document.getElementById('cal-complete').style.display = 'block';
+        document.getElementById('cal-status').innerText = "CALIBRATION COMPLETE";
+        document.getElementById('cal-status').classList.add('cal-complete');
+        document.getElementById('skip-cal-btn').style.display = 'none';
+        document.getElementById('continue-btn').style.display = 'block';
+    }
+
+    function skipCalibration() {
+        window.removeEventListener('devicemotion', checkDiveCalibration);
+        window.removeEventListener('devicemotion', checkFlipCalibration);
+        calDiveComplete = true;
+        calFlipComplete = true;
+        completeCalibration();
+    }
+
+    function showMenu() {
+        document.getElementById('calibration-screen').style.display = 'none';
+        document.getElementById('menu').style.display = 'flex';
+    }
+
+// ===== END OF PART 1 =====
+// ===== COPY PART 2 BELOW THIS LINE =====
+
+// ===== PART 2: STROKE MECHANICS & GAME LOOP =====
 
     function startRace(k) {
         currentEvent = events[k];
         document.getElementById('menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'block';
-        document.getElementById('legend-name').innerText = `VS ${currentEvent.n} (RECORD: ${currentEvent.t}s)`;
+        document.getElementById('legend-name').innerText = `VS ${currentEvent.n} ${currentEvent.flag} (RECORD: ${currentEvent.t}s)`;
+        
+        // Reset all state
+        pDist = 0; bDist = 0; oxy = 100;
+        isCramped = false; lastArm = null; sameCount = 0;
+        hasDived = false; lastFlipTime = 0;
+        flyLeftArm = false; flyRightArm = false; flyLeftKick = false; flyRightKick = false;
+        backstrokeSpeed = 0; lastTilt = 0; kicksAfterTurn = 0; justTurned = false;
+        sliderPosition = 0; sliderAtTop = false; sliderCycleComplete = false;
+        
+        // Set stroke type
+        if (currentEvent.stroke === "im") {
+            currentStroke = "butterfly";
+            imSegment = 0;
+        } else {
+            currentStroke = currentEvent.stroke;
+        }
+        
+        setupControls(currentStroke);
         runSequence();
     }
 
-    function runSequence() {
-        const sig = document.getElementById('signal');
-        sig.innerText = "READY...";
-        setTimeout(() => {
-            sig.innerText = "SET...";
-            window.addEventListener('devicemotion', handleFalseStart);
-            setTimeout(() => {
-                const beep = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = beep.createOscillator();
-                osc.connect(beep.destination);
-                sig.innerText = "GO!";
-                osc.start(); osc.stop(beep.currentTime + 0.15);
-                isRacing = true; startTime = performance.now();
-                window.removeEventListener('devicemotion', handleFalseStart);
-                window.addEventListener('devicemotion', handleFlip);
-                requestAnimationFrame(gameLoop);
-            }, Math.random() * 3000 + 1500);
-        }, 1500);
-    }
-
-    function handleFalseStart(e) {
-        if (Math.abs(e.accelerationIncludingGravity.z) > 35) {
-            alert("FALSE START! DQ!"); location.reload();
+    function setupControls(stroke) {
+        const controls = document.getElementById('controls');
+        controls.innerHTML = '';
+        controls.className = `controls-${stroke}`;
+        
+        if (stroke === "freestyle") {
+            controls.innerHTML = `
+                <button class="swim-btn" id="l-btn">LEFT ARM</button>
+                <button class="swim-btn" id="r-btn">RIGHT ARM</button>
+                <button class="swim-btn breathe-btn" id="b-btn">BREATHE (O2: <span id="oxy">100</span>%)</button>
+            `;
+            document.getElementById('l-btn').addEventListener('click', () => swimFreestyle('L'));
+            document.getElementById('r-btn').addEventListener('click', () => swimFreestyle('R'));
+            document.getElementById('b-btn').addEventListener('click', () => { 
+                if (isRacing && !isCramped) {
+                    oxy = Math.min(100, oxy + 35);
+                    document.getElementById('oxy').innerText = Math.max(0, oxy.toFixed(0));
+                }
+            });
+        } else if (stroke === "butterfly") {
+            controls.innerHTML = `
+                <button class="swim-btn butterfly-arm" id="fly-l-arm">LEFT ARM</button>
+                <button class="swim-btn butterfly-arm" id="fly-r-arm">RIGHT ARM</button>
+                <button class="swim-btn butterfly-kick" id="fly-l-kick">LEFT KICK</button>
+                <button class="swim-btn butterfly-kick" id="fly-r-kick">RIGHT KICK</button>
+            `;
+            document.getElementById('fly-l-arm').addEventListener('click', () => butterflyPress('larm'));
+            document.getElementById('fly-r-arm').addEventListener('click', () => butterflyPress('rarm'));
+            document.getElementById('fly-l-kick').addEventListener('click', () => butterflyPress('lkick'));
+            document.getElementById('fly-r-kick').addEventListener('click', () => butterflyPress('rkick'));
+        } else if (stroke === "backstroke") {
+            controls.innerHTML = `
+                <div class="swim-btn rock-zone" id="rock-zone">🔄 ROCK PHONE LEFT/RIGHT 🔄</div>
+                <button class="swim-btn" id="back-l-kick">LEFT KICK</button>
+                <button class="swim-btn" id="back-r-kick">RIGHT KICK</button>
+            `;
+            document.getElementById('back-l-kick').addEventListener('click', () => backstrokeKick('L'));
+            document.getElementById('back-r-kick').addEventListener('click', () => backstrokeKick('R'));
+            window.addEventListener('devicemotion', handleBackstrokeRocking);
+        } else if (stroke === "breaststroke") {
+            controls.innerHTML = `
+                <div class="slider-container">
+                    <input type="range" min="0" max="100" value="0" class="arm-slider" id="arm-slider">
+                    <div class="slider-label">ARMS<br>↑ Extend ↓ Pull</div>
+                </div>
+                <button class="swim-btn" id="breast-kick">KICK</button>
+            `;
+            const slider = document.getElementById('arm-slider');
+            slider.addEventListener('input', handleBreaststrokeSlider);
+            document.getElementById('breast-kick').addEventListener('click', breaststrokeKick);
         }
     }
 
-    function handleFlip(e) {
-        if (!isRacing) return;
-        // 360 Pitch Flip detection
-        if (Math.abs(e.rotationRate.alpha) > 350 && pDist % 100 > 88) {
-            pDist += 5; // Wall push boost
-        }
-    }
-
-    document.getElementById('l-btn').onclick = () => swim('L', 'l-btn', 'r-btn');
-    document.getElementById('r-btn').onclick = () => swim('R', 'r-btn', 'l-btn');
-    document.getElementById('b-btn').onclick = () => { oxy = 100; };
-
-    function swim(arm, id, other) {
+    // ===== FREESTYLE MECHANICS =====
+    function swimFreestyle(arm) {
         if (!isRacing || isCramped) return;
         
-        // Fatigue Logic: Buttons move and shrink
-        const btn = document.getElementById(id);
-        if (oxy < 60) {
-            btn.style.transform = `scale(${oxy/100 + 0.5}) translate(${Math.random()*15}px, ${Math.random()*10}px)`;
-        } else {
-            btn.style.transform = `scale(1) translate(0,0)`;
+        const btn = document.getElementById(arm === 'L' ? 'l-btn' : 'r-btn');
+        const other = document.getElementById(arm === 'L' ? 'r-btn' : 'l-btn');
+        
+        if (oxy < 40) {
+            const scale = 0.7 + (oxy / 100) * 0.3;
+            const xShift = Math.random() * 20 - 10;
+            const yShift = Math.random() * 15 - 7;
+            btn.style.transform = `scale(${scale}) translate(${xShift}px, ${yShift}px)`;
+            setTimeout(() => { btn.style.transform = 'scale(1) translate(0, 0)'; }, 150);
         }
 
-        document.getElementById(id).classList.add('active-btn');
-        document.getElementById(other).classList.remove('active-btn');
+        btn.classList.add('active-btn');
+        other.classList.remove('active-btn');
 
         if (arm === lastArm) {
             sameCount++;
@@ -170,18 +410,302 @@
         } else { sameCount = 0; }
         
         lastArm = arm;
-        pDist += (oxy > 0 ? 0.72 : 0.1);
-        oxy -= 3.5;
+        let speed = 0.85;
+        if (oxy < 20) speed = 0.3;
+        else if (oxy < 50) speed = 0.6;
+        
+        pDist += speed;
+        oxy -= 1.8;
         document.getElementById('oxy').innerText = Math.max(0, oxy.toFixed(0));
-        if (pDist >= currentEvent.l * 100) endRace(true);
+        checkRaceEnd();
+    }
+
+    // ===== BUTTERFLY MECHANICS =====
+    function butterflyPress(part) {
+        if (!isRacing || isCramped) return;
+        
+        if (part === 'larm') {
+            flyLeftArm = true;
+            document.getElementById('fly-l-arm').classList.add('active-btn');
+        } else if (part === 'rarm') {
+            flyRightArm = true;
+            document.getElementById('fly-r-arm').classList.add('active-btn');
+        } else if (part === 'lkick') {
+            flyLeftKick = true;
+            document.getElementById('fly-l-kick').classList.add('active-btn');
+        } else if (part === 'rkick') {
+            flyRightKick = true;
+            document.getElementById('fly-r-kick').classList.add('active-btn');
+        }
+        
+        // Check if both arms pressed
+        if (flyLeftArm && flyRightArm && !flyLeftKick && !flyRightKick) {
+            // Arms complete, waiting for kicks
+        }
+        
+        // Check if full stroke complete (both arms + both kicks)
+        if (flyLeftArm && flyRightArm && flyLeftKick && flyRightKick) {
+            pDist += 1.2; // Butterfly is powerful
+            
+            // Reset for next stroke
+            flyLeftArm = false; flyRightArm = false; flyLeftKick = false; flyRightKick = false;
+            document.getElementById('fly-l-arm').classList.remove('active-btn');
+            document.getElementById('fly-r-arm').classList.remove('active-btn');
+            document.getElementById('fly-l-kick').classList.remove('active-btn');
+            document.getElementById('fly-r-kick').classList.remove('active-btn');
+            
+            checkRaceEnd();
+        }
+    }
+
+    function butterflyWallTouch() {
+        const nearWall = pDist % 100 > 88 && pDist % 100 < 99;
+        if (!nearWall) return;
+        
+        // Check if both arms pressed for two-hand touch
+        if (flyLeftArm && flyRightArm) {
+            pDist += 5; // Wall push
+            flyLeftArm = false; flyRightArm = false;
+            document.getElementById('fly-l-arm').classList.remove('active-btn');
+            document.getElementById('fly-r-arm').classList.remove('active-btn');
+            
+            const sig = document.getElementById('signal');
+            sig.innerText = "TWO-HAND TOUCH!";
+            sig.style.color = "lime";
+            setTimeout(() => { sig.innerText = ""; }, 500);
+        }
+    }
+
+    // ===== BACKSTROKE MECHANICS =====
+    function handleBackstrokeRocking(e) {
+        if (!isRacing || currentStroke !== "backstroke" || !e.accelerationIncludingGravity) return;
+        
+        const tilt = e.accelerationIncludingGravity.x || 0;
+        const tiltChange = Math.abs(tilt - lastTilt);
+        
+        if (tiltChange > 1.5) {
+            backstrokeSpeed = 0.7; // Rocking generates speed
+        } else {
+            backstrokeSpeed *= 0.95; // Decay if not rocking
+        }
+        
+        lastTilt = tilt;
+        pDist += backstrokeSpeed;
+        checkRaceEnd();
+    }
+
+    function backstrokeKick(side) {
+        if (!isRacing || isCramped) return;
+        
+        const lBtn = document.getElementById('back-l-kick');
+        const rBtn = document.getElementById('back-r-kick');
+        
+        if (side === 'L') {
+            lBtn.classList.add('active-btn');
+            rBtn.classList.remove('active-btn');
+        } else {
+            rBtn.classList.add('active-btn');
+            lBtn.classList.remove('active-btn');
+        }
+        
+        // Check for double kick boost (only in first 5 kicks after turn)
+        if (justTurned && kicksAfterTurn < 5) {
+            // If both buttons active, it's a butterfly kick
+            if (lBtn.classList.contains('active-btn') && rBtn.classList.contains('active-btn')) {
+                pDist += 1.5; // Boost!
+                kicksAfterTurn++;
+                
+                const sig = document.getElementById('signal');
+                sig.innerText = "BUTTERFLY KICK!";
+                sig.style.color = "cyan";
+                setTimeout(() => { sig.innerText = ""; }, 400);
+            } else {
+                pDist += 0.5; // Normal kick
+            }
+        } else {
+            pDist += 0.5; // Normal kick
+        }
+        
+        checkRaceEnd();
+    }
+
+    // ===== BREASTSTROKE MECHANICS =====
+    function handleBreaststrokeSlider(e) {
+        if (!isRacing) return;
+        
+        const val = parseInt(e.target.value);
+        
+        // Check if reached top
+        if (val >= 95 && !sliderAtTop) {
+            sliderAtTop = true;
+        }
+        
+        // Check if returned to bottom after reaching top
+        if (val <= 5 && sliderAtTop && !sliderCycleComplete) {
+            sliderCycleComplete = true;
+            document.getElementById('breast-kick').style.background = 'lime';
+            document.getElementById('breast-kick').style.color = '#000';
+        }
+        
+        sliderPosition = val;
+    }
+
+    function breaststrokeKick() {
+        if (!isRacing || isCramped || !sliderCycleComplete) return;
+        
+        pDist += 1.0; // Breaststroke glide
+        
+        // Reset cycle
+        sliderCycleComplete = false;
+        sliderAtTop = false;
+        document.getElementById('arm-slider').value = 0;
+        document.getElementById('breast-kick').style.background = '';
+        document.getElementById('breast-kick').style.color = '';
+        
+        checkRaceEnd();
+    }
+
+    // ===== RACE SEQUENCE =====
+    function runSequence() {
+        const sig = document.getElementById('signal');
+        sig.innerText = "READY...";
+        setTimeout(() => {
+            sig.innerText = "SET...";
+            window.addEventListener('devicemotion', handleFalseStart);
+            setTimeout(() => {
+                if (audioContext) {
+                    const osc = audioContext.createOscillator();
+                    osc.connect(audioContext.destination);
+                    osc.frequency.value = 800;
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.15);
+                }
+                
+                sig.innerText = "GO! DIVE IN!";
+                sig.style.color = "lime";
+                window.removeEventListener('devicemotion', handleFalseStart);
+                window.addEventListener('devicemotion', handleDiveIn);
+                
+            }, Math.random() * 3000 + 1000);
+        }, 1500);
+    }
+
+    function handleFalseStart(e) {
+        if (e.accelerationIncludingGravity && Math.abs(e.accelerationIncludingGravity.z) > 15) {
+            window.removeEventListener('devicemotion', handleFalseStart);
+            alert("FALSE START! DQ!"); 
+            location.reload();
+        }
+    }
+
+    function handleDiveIn(e) {
+        if (hasDived || !e.accelerationIncludingGravity) return;
+        
+        const y = e.accelerationIncludingGravity.y || 0;
+        const z = e.accelerationIncludingGravity.z || 0;
+        const x = e.accelerationIncludingGravity.x || 0;
+        
+        if (Math.abs(y) > 3 || Math.abs(z - 9.8) > 4 || Math.abs(x) > 3) {
+            hasDived = true;
+            isRacing = true;
+            startTime = performance.now();
+            
+            const sig = document.getElementById('signal');
+            sig.innerText = "DIVE!";
+            sig.style.color = "cyan";
+            setTimeout(() => { sig.innerText = ""; sig.style.color = "yellow"; }, 800);
+            
+            window.removeEventListener('devicemotion', handleDiveIn);
+            if (currentStroke === "freestyle") {
+                window.addEventListener('devicemotion', handleFlip);
+            }
+            requestAnimationFrame(gameLoop);
+        }
+    }
+
+    function handleFlip(e) {
+        if (!isRacing || !e.rotationRate) return;
+        
+        const now = Date.now();
+        if (now - lastFlipTime < 1000) return;
+        
+        const pitchSpeed = Math.abs(e.rotationRate.beta || 0);
+        const rollSpeed = Math.abs(e.rotationRate.gamma || 0);
+        const yawSpeed = Math.abs(e.rotationRate.alpha || 0);
+        const totalRotation = pitchSpeed + rollSpeed + yawSpeed;
+        
+        const nearWall = pDist % 100 > 88 && pDist % 100 < 99;
+        
+        if (totalRotation > 200 && nearWall) {
+            lastFlipTime = now;
+            pDist += 5;
+            
+            if (currentStroke === "backstroke") {
+                justTurned = true;
+                kicksAfterTurn = 0;
+            }
+            
+            if (audioContext) {
+                const osc = audioContext.createOscillator();
+                osc.connect(audioContext.destination);
+                osc.frequency.value = 600;
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.1);
+            }
+            
+            const sig = document.getElementById('signal');
+            sig.innerText = "FLIP! +5m";
+            sig.style.color = "lime";
+            setTimeout(() => { sig.innerText = ""; sig.style.color = "yellow"; }, 500);
+        }
     }
 
     function triggerCramp() {
-        isCramped = true; sameCount = 0;
+        isCramped = true; 
+        sameCount = 0;
         document.getElementById('cramp-msg').style.display = 'block';
-        setTimeout(() => { isCramped = false; document.getElementById('cramp-msg').style.display = 'none'; }, 2500);
+        
+        if (audioContext) {
+            const osc = audioContext.createOscillator();
+            osc.connect(audioContext.destination);
+            osc.frequency.value = 200;
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.3);
+        }
+        
+        setTimeout(() => { 
+            isCramped = false; 
+            document.getElementById('cramp-msg').style.display = 'none'; 
+        }, 2500);
     }
 
+    function checkRaceEnd() {
+        if (currentEvent.stroke === "im") {
+            // Check if segment complete
+            const segmentLength = 200;
+            const segmentComplete = pDist >= (imSegment + 1) * segmentLength;
+            
+            if (segmentComplete && imSegment < 3) {
+                imSegment++;
+                const strokes = ["butterfly", "backstroke", "breaststroke", "freestyle"];
+                currentStroke = strokes[imSegment];
+                
+                // Clean up old event listeners
+                window.removeEventListener('devicemotion', handleBackstrokeRocking);
+                
+                setupControls(currentStroke);
+                
+                const sig = document.getElementById('signal');
+                sig.innerText = `${currentStroke.toUpperCase()}!`;
+                sig.style.color = "yellow";
+                setTimeout(() => { sig.innerText = ""; }, 1500);
+            }
+        }
+        
+        if (pDist >= currentEvent.l * 100) endRace(true);
+    }
+
+    // ===== GAME LOOP =====
     function gameLoop(t) {
         if (!isRacing) return;
         let elapsed = (t - startTime) / 1000;
@@ -189,51 +713,76 @@
         let s = (elapsed % 60).toFixed(2).padStart(5, '0');
         document.getElementById('stopwatch').innerText = `${m}:${s}`;
 
-        // LEGEND BOT: High difficulty, rubber-bands to the player
+        // Bot logic
         let botBase = (100 * currentEvent.l) / currentEvent.t;
-        let speedMult = (pDist > bDist + 4) ? 1.14 : 1.0; 
+        let speedMult = (pDist > bDist + 6) ? 1.12 : 1.0;
         bDist += (botBase / 60) * speedMult;
 
         if (bDist >= currentEvent.l * 100) endRace(false);
+        
+        // Check butterfly wall touch
+        if (currentStroke === "butterfly") {
+            butterflyWallTouch();
+        }
+        
         draw();
         requestAnimationFrame(gameLoop);
     }
 
     function draw() {
-        const c = document.getElementById('poolCanvas'); const ctx = c.getContext('2d');
-        c.width = window.innerWidth; c.height = window.innerHeight * 0.65;
-        ctx.fillStyle = "#0055aa"; ctx.fillRect(0,0,c.width,c.height);
+        const c = document.getElementById('poolCanvas'); 
+        const ctx = c.getContext('2d');
+        c.width = window.innerWidth; 
+        c.height = window.innerHeight * 0.65;
+        ctx.fillStyle = "#0055aa"; 
+        ctx.fillRect(0, 0, c.width, c.height);
         
-        ctx.strokeStyle = "white"; ctx.setLineDash([10, 20]);
-        ctx.beginPath(); ctx.moveTo(c.width/2, 0); ctx.lineTo(c.width/2, c.height); ctx.stroke();
+        ctx.strokeStyle = "white"; 
+        ctx.setLineDash([10, 20]);
+        ctx.beginPath(); 
+        ctx.moveTo(c.width / 2, 0); 
+        ctx.lineTo(c.width / 2, c.height); 
+        ctx.stroke();
 
         const getY = (d) => {
-            let p = d % 100; let l = Math.floor(d / 100);
+            let p = d % 100; 
+            let l = Math.floor(d / 100);
             let y = (p / 100) * (c.height - 100) + 50;
             return (l % 2 === 0) ? y : c.height - y;
         };
 
         // Opponent
-        ctx.save(); ctx.translate(c.width * 0.25, getY(bDist));
-        if (Math.floor(bDist/100) % 2 !== 0) ctx.rotate(Math.PI);
-        ctx.font = "40px Arial"; ctx.fillText("🏊", -20, 20); ctx.restore();
+        ctx.save(); 
+        ctx.translate(c.width * 0.25, getY(bDist));
+        if (Math.floor(bDist / 100) % 2 !== 0) ctx.rotate(Math.PI);
+        ctx.font = "40px Arial"; 
+        ctx.fillText("🏊", -20, 20); 
+        ctx.restore();
 
         // Player
-        ctx.save(); ctx.translate(c.width * 0.75, getY(pDist));
-        if (Math.floor(pDist/100) % 2 !== 0) ctx.rotate(Math.PI);
-        ctx.font = "50px Arial"; ctx.fillText("🦈", -25, 25); ctx.restore();
+        ctx.save(); 
+        ctx.translate(c.width * 0.75, getY(pDist));
+        if (Math.floor(pDist / 100) % 2 !== 0) ctx.rotate(Math.PI);
+        ctx.font = "50px Arial"; 
+        ctx.fillText("🦈", -25, 25); 
+        ctx.restore();
     }
 
     function endRace(win) {
         isRacing = false;
+        window.removeEventListener('devicemotion', handleFlip);
+        window.removeEventListener('devicemotion', handleBackstrokeRocking);
+        
         document.getElementById('game-container').style.display = 'none';
         document.getElementById('result-screen').style.display = 'flex';
+        
         if (win) {
             document.getElementById('win-lab').style.display = 'flex';
             document.getElementById('loss-area').style.display = 'none';
         } else {
             document.getElementById('win-lab').style.display = 'none';
             document.getElementById('loss-area').style.display = 'block';
+            document.getElementById('legend-final-name').innerText = `${currentEvent.n} ${currentEvent.flag}`;
         }
     }
 </script>
