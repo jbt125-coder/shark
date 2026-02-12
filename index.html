@@ -11,7 +11,9 @@
         .screen { width: 100vw; height: 100vh; display: none; position: absolute; top: 0; left: 0; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
         
         #story-screen { background: radial-gradient(circle, #001a33 0%, #000 100%); font-family: monospace; color: var(--neon-blue); }
-        .dna-box { border: 1px solid var(--neon-blue); padding: 20px; text-align: left; background: rgba(0,0,0,0.5); }
+        .dna-box { border: 1px solid var(--neon-blue); padding: 20px; text-align: left; background: rgba(0,0,0,0.5); max-width: 500px; }
+        .shark-flex { font-size: 120px; margin: 20px 0; animation: flex 1s ease-in-out infinite; }
+        @keyframes flex { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         #calibration-screen { background: radial-gradient(circle, #1a0033 0%, #000 100%); font-family: monospace; color: var(--neon-blue); }
         .cal-status { font-size: 1.5rem; margin: 20px 0; color: yellow; }
@@ -33,14 +35,15 @@
         .breathe-btn { grid-column: span 2; }
         
         .controls-butterfly { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
-        .rock-zone { grid-column: span 2; background: rgba(255,140,0,0.2); border: 3px dashed white; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .tilt-zone { grid-column: span 2; background: rgba(255,140,0,0.2); border: 3px dashed white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-direction: column; }
         
         .controls-backstroke { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+        .rock-zone { grid-column: span 2; background: rgba(100,100,255,0.2); border: 3px dashed white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         
         .controls-breaststroke { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
-        .slider-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .slider-container { display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .arm-slider { -webkit-appearance: none; width: 80%; height: 200px; background: linear-gradient(to top, #00f2ff, #ff8c00); writing-mode: bt-lr; -webkit-writing-mode: bt-lr; transform: rotate(270deg); cursor: pointer; border-radius: 10px; }
-        .arm-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 50px; height: 50px; background: white; border-radius: 50%; cursor: pointer; border: 3px solid #000; }
+        .arm-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 50px; height: 50px; background: white; border-radius: 50%; cursor: pointer; border: 3px solid #000; }
         .arm-slider::-moz-range-thumb { width: 50px; height: 50px; background: white; border-radius: 50%; cursor: pointer; border: 3px solid #000; }
         
         #cramp-msg { position: absolute; top: 45%; width: 100%; color: red; font-size: 3.5rem; display: none; z-index: 100; text-shadow: 2px 2px #000; }
@@ -48,52 +51,57 @@
         
         .legend-portrait { width: 200px; height: 200px; border-radius: 10px; border: 3px solid var(--orange); background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%); display: flex; align-items: center; justify-content: center; font-size: 80px; margin: 20px auto; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
         
-        /* Wheaties Box Photo Screen */
-        #wheaties-screen { background: var(--orange); }
-        #photo-canvas { max-width: 90%; max-height: 60vh; border: 3px solid #000; margin: 20px 0; }
-        #camera-video { max-width: 90%; max-height: 50vh; border: 3px solid var(--neon-blue); }
+        #photo-screen { background: var(--orange); }
+        .video-container { position: relative; display: inline-block; }
+        #camera-video { max-width: 90%; max-height: 50vh; border: 3px solid var(--neon-blue); border-radius: 10px; }
+        .mustache-overlay { position: absolute; bottom: 35%; left: 50%; transform: translateX(-50%); font-size: 80px; pointer-events: none; }
+        .medals-overlay { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 60px; pointer-events: none; }
+        #photo-canvas { max-width: 90%; border: 3px solid #000; margin: 10px 0; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body onload="init()">
 
     <div id="story-screen" class="screen">
+        <div class="shark-flex">🦈💪</div>
+        <h1 style="color: var(--orange); margin: 10px 0; font-size: 2.5rem;">SHARK BOY '72</h1>
+        <h2 style="color: var(--neon-blue); margin: 5px 0;">CHRONO-LINK</h2>
         <div class="dna-box">
-            <h2 style="margin:0;">MISSION: CHRONO-72</h2>
-            <p>> YEAR: 2172</p>
-            <p>> DNA: Shark-Human Hybrid #007</p>
-            <p>> OBJECTIVE: Prove genetic evolution by defeating the natural legends of 1972.</p>
-            <p>> MISSION: Complete calibration to unlock time-stream.</p>
+            <p style="margin: 5px 0;">> YEAR: 2172</p>
+            <p style="margin: 5px 0;">> AGENT: Shark-Human Hybrid #007</p>
+            <p style="margin: 5px 0;">> MISSION: Travel to 1972 Munich Olympics</p>
+            <p style="margin: 5px 0;">> OBJECTIVE: Defeat swimming legends using future genetics</p>
+            <p style="margin: 5px 0; color: yellow;">> STATUS: Time machine activation required</p>
         </div>
-        <button class="btn" style="background:var(--neon-blue); color:#000; margin-top:20px;" onclick="showCalibration()">[ BEGIN CALIBRATION ]</button>
+        <button class="btn" style="background:lime; color:#000; margin-top:20px; font-size: 1.1rem;" onclick="activateTimeMachine()">⚡ ACTIVATE TIME MACHINE ⚡</button>
     </div>
 
     <div id="calibration-screen" class="screen">
-        <h2 style="color:var(--neon-blue);">CALIBRATION PROTOCOL</h2>
-        <div class="cal-status" id="cal-status">TESTING DIVE MECHANISM...</div>
+        <h2 style="color:var(--neon-blue);">TIME MACHINE CALIBRATION</h2>
+        <div class="cal-status" id="cal-status">INITIALIZING CHRONO-SYNC...</div>
         <div style="border: 2px solid var(--neon-blue); padding: 20px; margin: 20px; background: rgba(0,0,0,0.5); font-family: monospace;">
             <div id="dive-test" style="display:none;">
-                <p>TEST 1: DIVE ENTRY</p>
-                <p style="font-size: 0.9rem;">When you see "GO!", tilt phone forward to dive.</p>
+                <p>TEST 1: TEMPORAL DIVE</p>
+                <p style="font-size: 0.9rem;">When you see "GO!", tilt phone forward.</p>
                 <div id="dive-signal" style="font-size: 2rem; color: yellow; margin: 20px 0;"></div>
             </div>
             <div id="flip-test" style="display:none;">
-                <p>TEST 2: WALL TURN</p>
+                <p>TEST 2: DIMENSIONAL FLIP</p>
                 <p style="font-size: 0.9rem;">Rotate phone 360° in any direction.</p>
                 <div id="flip-signal" style="font-size: 2rem; color: yellow; margin: 20px 0;">Rotate phone now!</div>
             </div>
             <div id="cal-complete" style="display:none;">
-                <p style="color: lime; font-size: 1.5rem;">✓ CALIBRATION COMPLETE</p>
-                <p style="font-size: 0.9rem;">All systems operational.</p>
+                <p style="color: lime; font-size: 1.5rem;">✓ CHRONO-SYNC COMPLETE</p>
+                <p style="font-size: 0.9rem;">Time stream locked on 1972.</p>
             </div>
         </div>
         <button class="btn" id="skip-cal-btn" onclick="skipCalibration()">SKIP CALIBRATION</button>
-        <button class="btn" id="continue-btn" style="background:lime; color:#000; display:none;" onclick="showMenu()">[ INITIATE FINAL TIME TRAVEL ]</button>
+        <button class="btn" id="continue-btn" style="background:lime; color:#000; display:none;" onclick="showMenu()">[ INITIATE TIME TRAVEL ]</button>
     </div>
 
     <div id="menu" class="screen">
-        <h1 style="margin:0;">SHARK BOY '72</h1>
-        <p style="margin-top:0; font-size:0.8rem;">SELECT OLYMPIC EVENT</p>
+        <h1 style="margin:0;">MUNICH 1972</h1>
+        <p style="margin-top:0; font-size:0.8rem;">SELECT TARGET EVENT</p>
         <button class="btn" onclick="startRace('fly100')">100m Butterfly (Spitz 🇺🇸)</button>
         <button class="btn" onclick="startRace('fly200')">200m Butterfly (Spitz 🇺🇸)</button>
         <button class="btn" onclick="startRace('free100')">100m Freestyle (Spitz 🇺🇸)</button>
@@ -116,31 +124,38 @@
 
     <div id="result-screen" class="screen">
         <div id="win-lab">
-            <h1 style="color:var(--neon-blue);">GENETIC SUPERIORITY</h1>
-            <div style="font-family:monospace;">FUTURE DNA VERIFIED: 100%</div>
-            <div class="legend-portrait">🥈</div>
-            <button class="btn" style="background:lime; color:#000; margin-top:20px;" onclick="startWheaties()">📸 CLAIM YOUR WHEATIES BOX!</button>
+            <h1 style="color:var(--neon-blue);">TIMELINE ALTERED!</h1>
+            <div style="font-family:monospace; font-size: 1.2rem;">FUTURE DNA SUPERIOR: CONFIRMED</div>
+            <div class="legend-portrait">🥇</div>
+            <div style="margin-top: 10px; font-size: 1.1rem;" id="win-time">--</div>
+            <button class="btn" style="background:lime; color:#000; margin-top:20px;" onclick="startPhoto()">📸 CAPTURE VICTORY PHOTO</button>
         </div>
         <div id="loss-area">
-            <h1 id="res-title">LEGEND REMAINS CHAMPION</h1>
+            <h1 id="res-title">TIMELINE UNCHANGED</h1>
             <div class="legend-portrait">🏆</div>
             <p id="legend-final-name" style="font-size: 1.2rem;">--</p>
+            <p style="font-size: 0.9rem; color: #aaa;">The legends remain undefeated</p>
         </div>
-        <button class="btn" style="margin-top:20px;" onclick="location.reload()">RE-SYNC DNA</button>
+        <button class="btn" style="margin-top:20px;" onclick="location.reload()">🔄 RETRY MISSION</button>
     </div>
 
-    <div id="wheaties-screen" class="screen">
-        <h1 style="margin:0;">CREATE YOUR WHEATIES BOX</h1>
+    <div id="photo-screen" class="screen">
+        <h2 style="margin: 10px 0;">VICTORY DOCUMENTATION</h2>
+        <p id="photo-event-name" style="font-size: 1.1rem; margin: 5px 0;">--</p>
         <div id="camera-container">
-            <video id="camera-video" autoplay playsinline></video>
-            <button class="btn" style="margin-top:10px;" onclick="capturePhoto()">📸 CAPTURE PHOTO</button>
-            <button class="btn" onclick="cancelWheaties()">CANCEL</button>
+            <div class="video-container">
+                <video id="camera-video" autoplay playsinline></video>
+                <div class="mustache-overlay">👨</div>
+                <div class="medals-overlay">🥇🥇🥇</div>
+            </div>
+            <button class="btn" style="margin-top:15px; background: lime; color: #000; font-size: 1.1rem;" onclick="capturePhoto()">📸 TAKE PHOTO</button>
+            <button class="btn" onclick="cancelPhoto()">CANCEL</button>
         </div>
         <div id="preview-container" class="hidden">
             <canvas id="photo-canvas"></canvas>
-            <button class="btn" style="background:lime; color:#000; margin-top:10px;" onclick="saveWheaties()">💾 SAVE TO PHOTOS</button>
+            <button class="btn" style="background:lime; color:#000; margin-top:10px; font-size: 1.1rem;" onclick="savePhoto()">💾 SAVE TO PHOTOS</button>
             <button class="btn" onclick="retakePhoto()">🔄 RETAKE</button>
-            <button class="btn" onclick="cancelWheaties()">CANCEL</button>
+            <button class="btn" onclick="cancelPhoto()">CANCEL</button>
         </div>
     </div>
 
@@ -160,33 +175,45 @@
     let audioContext = null, permissionsGranted = false, hasDived = false, lastFlipTime = 0;
     
     let calDiveComplete = false, calFlipComplete = false;
-    let flyLeftArm = false, flyRightArm = false, flyLeftKick = false, flyRightKick = false;
-    let flyRockPhase = "neutral"; // neutral, down, up
-    let lastFlyPitch = 0;
+    let flyArmsReady = false; // Simplified butterfly - just detect ANY tilt
     
     let lastTilt = 0, backstrokeSpeed = 0, kicksAfterTurn = 0, justTurned = false;
     let sliderPosition = 0, sliderAtTop = false, sliderCycleComplete = false;
     let currentStroke = "butterfly", imSegment = 0;
     
-    let cameraStream = null, capturedImage = null;
+    let cameraStream = null;
 
-    async function init() {
+    function init() {
         document.getElementById('story-screen').style.display = 'flex';
+    }
+
+    async function activateTimeMachine() {
+        // Initialize audio and motion sensors
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
         
+        // Request motion permissions
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
             try {
                 const permission = await DeviceMotionEvent.requestPermission();
                 permissionsGranted = (permission === 'granted');
+                if (!permissionsGranted) {
+                    alert('Motion sensors required for time travel! Please allow access.');
+                    return;
+                }
             } catch (error) {
-                permissionsGranted = false;
+                alert('Error activating motion sensors. Please try again.');
+                return;
             }
         } else {
             permissionsGranted = true;
+            // Activate sensors with dummy listener
+            const activate = () => window.removeEventListener('devicemotion', activate);
+            window.addEventListener('devicemotion', activate);
         }
-    }
-
-    function showCalibration() {
-        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Proceed to calibration
         document.getElementById('story-screen').style.display = 'none';
         document.getElementById('calibration-screen').style.display = 'flex';
         setTimeout(() => {
@@ -211,10 +238,10 @@
         const z = e.accelerationIncludingGravity.z || 0;
         const x = e.accelerationIncludingGravity.x || 0;
         
-        if (Math.abs(y) > 3 || Math.abs(z - 9.8) > 4 || Math.abs(x) > 3) {
+        if (Math.abs(y) > 2 || Math.abs(z - 9.8) > 3 || Math.abs(x) > 2) {
             calDiveComplete = true;
             window.removeEventListener('devicemotion', checkDiveCalibration);
-            document.getElementById('dive-signal').innerText = "✓ DIVE DETECTED";
+            document.getElementById('dive-signal').innerText = "✓ TEMPORAL LOCK ACQUIRED";
             document.getElementById('dive-signal').style.color = "lime";
             
             if (audioContext) {
@@ -240,7 +267,7 @@
         if (total > 200) {
             calFlipComplete = true;
             window.removeEventListener('devicemotion', checkFlipCalibration);
-            document.getElementById('flip-signal').innerText = "✓ FLIP DETECTED";
+            document.getElementById('flip-signal').innerText = "✓ DIMENSIONAL SYNC COMPLETE";
             document.getElementById('flip-signal').style.color = "lime";
             
             if (audioContext) {
@@ -258,7 +285,7 @@
     function completeCalibration() {
         document.getElementById('flip-test').style.display = 'none';
         document.getElementById('cal-complete').style.display = 'block';
-        document.getElementById('cal-status').innerText = "CALIBRATION COMPLETE";
+        document.getElementById('cal-status').innerText = "TIME MACHINE READY";
         document.getElementById('cal-status').classList.add('cal-complete');
         document.getElementById('skip-cal-btn').style.display = 'none';
         document.getElementById('continue-btn').style.display = 'block';
@@ -283,8 +310,7 @@
         
         pDist = 0; bDist = 0; oxy = 100; finalTime = "";
         isCramped = false; lastArm = null; sameCount = 0; hasDived = false; lastFlipTime = 0;
-        flyLeftArm = false; flyRightArm = false; flyLeftKick = false; flyRightKick = false;
-        flyRockPhase = "neutral"; lastFlyPitch = 0;
+        flyArmsReady = false;
         backstrokeSpeed = 0; lastTilt = 0; kicksAfterTurn = 0; justTurned = false;
         sliderPosition = 0; sliderAtTop = false; sliderCycleComplete = false;
         
@@ -320,16 +346,17 @@
             });
         } else if (stroke === "butterfly") {
             controls.innerHTML = `
-                <div class="swim-btn rock-zone" id="fly-rock">🔄 ROCK PHONE UP/DOWN<br>↓ Arms Extend ↑ Arms Pull 🔄</div>
-                <button class="swim-btn" id="fly-l-kick">LEFT KICK</button>
-                <button class="swim-btn" id="fly-r-kick">RIGHT KICK</button>
+                <div class="swim-btn tilt-zone" id="fly-tilt">
+                    <div>🔄 TILT PHONE 🔄</div>
+                    <div style="font-size: 0.8rem; margin-top: 5px;">Any direction = Arms</div>
+                </div>
+                <button class="swim-btn" id="fly-kick">KICK (Optional Boost)</button>
             `;
-            document.getElementById('fly-l-kick').addEventListener('click', () => butterflyKick('L'));
-            document.getElementById('fly-r-kick').addEventListener('click', () => butterflyKick('R'));
-            window.addEventListener('devicemotion', handleButterflyRocking);
+            document.getElementById('fly-kick').addEventListener('click', butterflyKick);
+            window.addEventListener('devicemotion', handleButterflyTilt);
         } else if (stroke === "backstroke") {
             controls.innerHTML = `
-                <div class="swim-btn rock-zone" id="rock-zone">🔄 ROCK PHONE LEFT/RIGHT 🔄</div>
+                <div class="swim-btn rock-zone">🔄 ROCK PHONE LEFT/RIGHT 🔄</div>
                 <button class="swim-btn" id="back-l-kick">LEFT KICK</button>
                 <button class="swim-btn" id="back-r-kick">RIGHT KICK</button>
             `;
@@ -380,73 +407,42 @@
         checkRaceEnd();
     }
 
-    function handleButterflyRocking(e) {
+    function handleButterflyTilt(e) {
         if (!isRacing || currentStroke !== "butterfly" || !e.accelerationIncludingGravity) return;
         
-        const pitch = e.accelerationIncludingGravity.y || 0;
-        const pitchDiff = pitch - lastFlyPitch;
+        const y = e.accelerationIncludingGravity.y || 0;
+        const z = e.accelerationIncludingGravity.z || 0;
+        const x = e.accelerationIncludingGravity.x || 0;
         
-        // Detect down tilt (arms extend)
-        if (pitchDiff < -2 && flyRockPhase !== "down") {
-            flyRockPhase = "down";
-            flyLeftArm = true;
-            document.getElementById('fly-rock').style.background = 'rgba(0,242,255,0.4)';
+        // Very forgiving - ANY tilt/movement counts as arms
+        if (Math.abs(y) > 1.5 || Math.abs(z - 9.8) > 2 || Math.abs(x) > 1.5) {
+            if (!flyArmsReady) {
+                flyArmsReady = true;
+                pDist += 0.8; // Base swimming from arms
+                document.getElementById('fly-tilt').style.background = 'rgba(0,242,255,0.4)';
+                
+                // Reset after short delay
+                setTimeout(() => {
+                    flyArmsReady = false;
+                    document.getElementById('fly-tilt').style.background = '';
+                }, 800);
+                
+                checkRaceEnd();
+            }
         }
-        
-        // Detect up tilt (arms pull) - completes arm cycle
-        if (pitchDiff > 2 && flyRockPhase === "down") {
-            flyRockPhase = "up";
-            flyRightArm = true;
-            document.getElementById('fly-rock').style.background = 'rgba(255,140,0,0.4)';
-        }
-        
-        lastFlyPitch = pitch;
     }
 
-    function butterflyKick(side) {
+    function butterflyKick() {
         if (!isRacing || isCramped) return;
         
-        const lBtn = document.getElementById('fly-l-kick');
-        const rBtn = document.getElementById('fly-r-kick');
+        // Optional boost
+        pDist += 0.4;
         
-        if (side === 'L') {
-            flyLeftKick = true;
-            lBtn.classList.add('active-btn');
-        } else {
-            flyRightKick = true;
-            rBtn.classList.add('active-btn');
-        }
+        const btn = document.getElementById('fly-kick');
+        btn.classList.add('active-btn');
+        setTimeout(() => btn.classList.remove('active-btn'), 200);
         
-        // Check if full stroke complete
-        if (flyLeftArm && flyRightArm && flyLeftKick && flyRightKick) {
-            pDist += 1.2;
-            
-            flyLeftArm = false; flyRightArm = false; flyLeftKick = false; flyRightKick = false;
-            flyRockPhase = "neutral";
-            lBtn.classList.remove('active-btn');
-            rBtn.classList.remove('active-btn');
-            document.getElementById('fly-rock').style.background = '';
-            
-            checkRaceEnd();
-        }
-    }
-
-    function butterflyWallTouch() {
-        const nearWall = pDist % 100 > 88 && pDist % 100 < 99;
-        if (!nearWall) return;
-        
-        const lBtn = document.getElementById('fly-l-kick');
-        const rBtn = document.getElementById('fly-r-kick');
-        
-        // Forgiving: if both buttons pressed recently (both have active class)
-        if (lBtn.classList.contains('active-btn') && rBtn.classList.contains('active-btn')) {
-            pDist += 5;
-            
-            const sig = document.getElementById('signal');
-            sig.innerText = "TWO-HAND TOUCH!";
-            sig.style.color = "lime";
-            setTimeout(() => { sig.innerText = ""; }, 500);
-        }
+        checkRaceEnd();
     }
 
     function handleBackstrokeRocking(e) {
@@ -456,7 +452,7 @@
         const tiltChange = Math.abs(tilt - lastTilt);
         
         if (tiltChange > 1.5) {
-            backstrokeSpeed = 0.4; // Reduced from 0.7
+            backstrokeSpeed = 0.4;
         } else {
             backstrokeSpeed *= 0.92;
         }
@@ -520,7 +516,7 @@
     function breaststrokeKick() {
         if (!isRacing || isCramped || !sliderCycleComplete) return;
         
-        pDist += 1.8; // Increased from 1.0
+        pDist += 1.8;
         
         sliderCycleComplete = false;
         sliderAtTop = false;
@@ -570,7 +566,7 @@
         const z = e.accelerationIncludingGravity.z || 0;
         const x = e.accelerationIncludingGravity.x || 0;
         
-        if (Math.abs(y) > 3 || Math.abs(z - 9.8) > 4 || Math.abs(x) > 3) {
+        if (Math.abs(y) > 2 || Math.abs(z - 9.8) > 3 || Math.abs(x) > 2) {
             hasDived = true;
             isRacing = true;
             startTime = performance.now();
@@ -649,7 +645,7 @@
                 currentStroke = strokes[imSegment];
                 
                 window.removeEventListener('devicemotion', handleBackstrokeRocking);
-                window.removeEventListener('devicemotion', handleButterflyRocking);
+                window.removeEventListener('devicemotion', handleButterflyTilt);
                 
                 setupControls(currentStroke);
                 
@@ -675,8 +671,6 @@
         bDist += (botBase / 60) * speedMult;
 
         if (bDist >= currentEvent.l * 100) endRace(false);
-        
-        if (currentStroke === "butterfly") butterflyWallTouch();
         
         draw();
         requestAnimationFrame(gameLoop);
@@ -723,9 +717,8 @@
         isRacing = false;
         window.removeEventListener('devicemotion', handleFlip);
         window.removeEventListener('devicemotion', handleBackstrokeRocking);
-        window.removeEventListener('devicemotion', handleButterflyRocking);
+        window.removeEventListener('devicemotion', handleButterflyTilt);
         
-        // Calculate final time
         const elapsed = (performance.now() - startTime) / 1000;
         const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
         const s = (elapsed % 60).toFixed(2).padStart(5, '0');
@@ -737,6 +730,7 @@
         if (win) {
             document.getElementById('win-lab').style.display = 'flex';
             document.getElementById('loss-area').style.display = 'none';
+            document.getElementById('win-time').innerText = `Time: ${finalTime}`;
         } else {
             document.getElementById('win-lab').style.display = 'none';
             document.getElementById('loss-area').style.display = 'block';
@@ -744,20 +738,18 @@
         }
     }
 
-    // ===== WHEATIES BOX PHOTO FEATURE =====
-    
-    async function startWheaties() {
+    // PHOTO FEATURE
+    async function startPhoto() {
         document.getElementById('result-screen').style.display = 'none';
-        document.getElementById('wheaties-screen').style.display = 'flex';
+        document.getElementById('photo-screen').style.display = 'flex';
+        document.getElementById('photo-event-name').innerText = `${currentEvent.eventName} - ${finalTime}`;
         
         try {
-            cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'user' } 
-            });
+            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
             document.getElementById('camera-video').srcObject = cameraStream;
         } catch (error) {
-            alert('Camera access denied. Please enable camera permissions.');
-            cancelWheaties();
+            alert('Camera access required. Please enable camera permissions.');
+            cancelPhoto();
         }
     }
 
@@ -766,77 +758,41 @@
         const canvas = document.getElementById('photo-canvas');
         const ctx = canvas.getContext('2d');
         
-        // Set canvas to portrait Wheaties box dimensions
-        canvas.width = 600;
-        canvas.height = 900;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
         
-        // Draw Wheaties box design
-        ctx.fillStyle = '#ff8c00';
-        ctx.fillRect(0, 0, 600, 900);
+        // Draw video frame
+        ctx.drawImage(video, 0, 0);
         
-        // Wheaties logo area
-        ctx.fillStyle = '#ff6347';
-        ctx.font = 'bold 80px Arial';
-        ctx.fillText('Wheaties', 150, 100);
+        // Add mustache
+        const mustacheSize = canvas.width * 0.2;
+        ctx.font = `${mustacheSize}px Arial`;
+        ctx.fillText('👨', canvas.width/2 - mustacheSize/2, canvas.height * 0.65);
         
-        // Event name
-        ctx.fillStyle = '#00f2ff';
-        ctx.font = 'bold 40px Arial';
-        ctx.fillText(currentEvent.eventName.toUpperCase(), 80, 180);
-        
-        // Time subtitle
-        ctx.fillStyle = '#000';
-        ctx.font = '30px Arial';
-        ctx.fillText(`TIME: ${finalTime}`, 180, 230);
-        
-        // Draw captured photo
-        ctx.save();
-        ctx.translate(300, 550);
-        
-        // Draw photo in circle/portrait area
-        const photoSize = 400;
-        ctx.beginPath();
-        ctx.rect(-200, -200, photoSize, photoSize);
-        ctx.clip();
-        ctx.drawImage(video, -200, -200, photoSize, photoSize);
-        ctx.restore();
-        
-        // Draw mustache overlay
-        ctx.font = '80px Arial';
-        ctx.fillText('👨', 260, 620);
-        
-        // Medal overlay
-        ctx.font = '60px Arial';
-        ctx.fillText('🥇🥇🥇', 200, 750);
-        
-        // Bottom text
-        ctx.fillStyle = '#000';
-        ctx.font = 'bold 25px Arial';
-        ctx.fillText('1972 OLYMPICS SWIM LEGEND', 100, 850);
+        // Add medals
+        const medalSize = canvas.width * 0.15;
+        ctx.font = `${medalSize}px Arial`;
+        ctx.fillText('🥇🥇🥇', canvas.width/2 - medalSize*1.5, canvas.height * 0.85);
         
         // Stop camera
         if (cameraStream) {
             cameraStream.getTracks().forEach(track => track.stop());
         }
         
-        // Show preview
         document.getElementById('camera-container').classList.add('hidden');
         document.getElementById('preview-container').classList.remove('hidden');
     }
 
-    function saveWheaties() {
+    function savePhoto() {
         const canvas = document.getElementById('photo-canvas');
-        
-        // Convert to blob and download
         canvas.toBlob((blob) => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `wheaties-${currentEvent.eventName}-${finalTime}.png`;
+            a.download = `victory-${currentEvent.eventName}-${finalTime}.png`;
             a.click();
             URL.revokeObjectURL(url);
-            
-            alert('Wheaties box saved! Check your downloads.');
+            alert('Photo saved to downloads!');
             location.reload();
         });
     }
@@ -844,10 +800,10 @@
     function retakePhoto() {
         document.getElementById('preview-container').classList.add('hidden');
         document.getElementById('camera-container').classList.remove('hidden');
-        startWheaties();
+        startPhoto();
     }
 
-    function cancelWheaties() {
+    function cancelPhoto() {
         if (cameraStream) {
             cameraStream.getTracks().forEach(track => track.stop());
         }
